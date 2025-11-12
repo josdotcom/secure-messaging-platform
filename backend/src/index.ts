@@ -13,7 +13,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:5123',
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -49,7 +49,7 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
     try {
-        await connectToDatabase();
+        // await connectToDatabase();
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
             console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
