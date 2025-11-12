@@ -4,7 +4,7 @@ export interface IMessage extends Document {
     _id: mongoose.Types.ObjectId;
     senderId: mongoose.Types.ObjectId;
     recipientId?: mongoose.Types.ObjectId;
-    GroupId?: mongoose.Types.ObjectId;
+    groupId?: mongoose.Types.ObjectId;
     content: string;
     type: 'private' | 'group' | 'team';
     attachments?: {
@@ -35,7 +35,7 @@ const MessageSchema = new Schema<IMessage>({
             return this.type === 'private';
         }
     },
-    GroupId: {
+    groupId: {
         type: Schema.Types.ObjectId,
         ref: 'Group',
         required: function(this: IMessage) {
