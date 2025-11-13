@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type { SignOptions } from 'jsonwebtoken';
-import { User } from '../models/User.js';
+import { User } from '../models/User';
 
 interface TokenPayload {
     userId: string;
