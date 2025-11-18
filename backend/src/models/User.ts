@@ -22,14 +22,16 @@ const UserSchema= new Schema<IUser>({
         required: [true, 'Email is required'],
         lowercase: true,
         trim: true,
-        match: [/.+\@.+\..+/, 'Please fill a valid email address']
+        match: [/.+\@.+\..+/, 'Please fill a valid email address'],
+        unique: true
     },
     username: { 
         type: String,
         required: [true, 'Username is required'],
         trim: true,
         minlength: [3, 'Username must be at least 3 characters long'],
-        maxlength: [30, 'Username cannot exceed 30 characters']
+        maxlength: [30, 'Username cannot exceed 30 characters'],
+        unique: true
     },
     passwordHash: { 
         type: String,
@@ -76,8 +78,5 @@ UserSchema.pre('save', async function(next) {
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.passwordHash);
 }
-
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
 
 export const User = mongoose.model<IUser>('User', UserSchema);

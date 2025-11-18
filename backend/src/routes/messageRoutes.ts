@@ -1,8 +1,8 @@
 import { Router } from "express";
-import messageController from "../controllers/messageController";
+import messageController from "../controllers/messageController.js";
 import { body } from "express-validator";
-import { authenticate } from "../middleware/authMiddleware";
-import { validate } from "../middleware/validationMiddleware";
+import { authenticate } from "../middleware/authMiddleware.js";
+import { validate } from "../middleware/validationMiddleware.js";
 
 const router = Router();
 

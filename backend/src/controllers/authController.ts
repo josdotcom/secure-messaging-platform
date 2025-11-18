@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import authService from "../services/authService";
-import type { AuthRequest } from "../middleware/authMiddleware";
+import authService from "../services/authService.js";
+import type { AuthRequest } from "../middleware/authMiddleware.js";
 
 class AuthController {
     async register(req: Request, res: Response) {
