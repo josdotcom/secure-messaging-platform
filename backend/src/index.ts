@@ -2,14 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import http from 'http';
 import rateLimit from 'express-rate-limit';
 import { connectToDatabase } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import SocketService from './socket/socketService.js';
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+
+const socketService = new SocketService(server);
+
+connectToDatabase();
 
 app.use(helmet());
 app.use(cors({
@@ -32,7 +39,11 @@ const authLimiter = rateLimit({
 });
 
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK' });
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        onlineUsers: socketService.getOnlineUsers().length
+    });
 });
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/messages', messageRoutes);
