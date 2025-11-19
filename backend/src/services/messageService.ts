@@ -1,5 +1,5 @@
-import { Message } from "../models/Message";
-import type { IMessage } from "../models/Message";
+import { Message } from "../models/Message.js";
+import type { IMessage } from "../models/Message.js";
 import mongoose from "mongoose";
 
 class MessageService {

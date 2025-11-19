@@ -52,14 +52,13 @@ const MessageSchema = new Schema<IMessage>({
         enum: ['private', 'group', 'team'],
         required: true
     },
-    attachments: [
-        {
-            url: String,
-            filename: String,
-            type: String,
-            Size: Number
-        }
-    ],
+    attachments: [{
+        _id: false,
+        url: String,
+        filename: String,
+        type: String,
+        Size: Number
+    }],
     isRead: {
         type: Boolean,
         default: false

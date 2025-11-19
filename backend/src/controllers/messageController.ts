@@ -1,6 +1,6 @@
 import type { Response } from "express";
-import messageService from "../services/messageService";
-import type { AuthRequest } from "../middleware/authMiddleware";
+import messageService from "../services/messageService.js";
+import type { AuthRequest } from "../middleware/authMiddleware.js";
 
 class MessageController {
     async createMessage(req: AuthRequest, res: Response) {
