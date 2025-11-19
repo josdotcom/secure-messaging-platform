@@ -91,4 +91,123 @@ describe("Message Model", () => {
             await expect(message.save()).rejects.toThrow();
         });
     });
+
+    describe("Message Attachments", () => {
+        it('should store attachments', async () => {
+            const sender = await createTestUser();
+            const recipient = await createTestUser();
+
+            const message = new Message({
+                senderId: sender._id,
+                recipientId: recipient._id,
+                content: 'Message with file',
+                type: 'private',
+                attachments: [
+                    {
+                        filename: 'image.png',
+                        url: 'http://example.com/image.png',
+                        type: 'image/png',
+                        Size: 1024
+                    }
+                ]
+            });
+
+            const savedMessage = await message.save();
+
+            expect(savedMessage).toBeDefined();
+            expect(savedMessage.attachments).toHaveLength(1);
+            expect(savedMessage.attachments[0].filename).toBe('image.png');
+            expect(savedMessage.attachments[0].url).toBe('http://example.com/image.png');
+            expect(savedMessage.attachments[0].type).toBe('image/png');
+            expect(savedMessage.attachments[0].Size).toBe(1024);
+        });
+
+        it('should create a message with multiple attachments', async () => {
+            const sender = await createTestUser();
+            const recipient = await createTestUser();
+
+            const messageData = new Message({
+                senderId: sender._id,
+                recipientId: recipient._id,
+                content: 'Multiple files',
+                messageType: 'file',
+                type: 'private',
+                attachments: [
+                    {
+                        filename: 'doc.pdf',
+                        url: 'http://example.com/doc.pdf',
+                        type: 'application/pdf',
+                        Size: 2048
+                    },
+                    {
+                        filename: 'photo.jpg',
+                        url: 'http://example.com/photo.jpg',
+                        type: 'image/jpeg',
+                        Size: 4096
+                    }
+                ]
+            });
+
+            const message = await Message.create(messageData);
+
+            expect(message.attachments).toHaveLength(2);
+            expect(message.attachments[0].filename).toBe('doc.pdf');
+            expect(message.attachments[1].filename).toBe('photo.jpg');
+        });
+    });
+
+    describe("Message States", () => {
+        it("should mark message as read", async () => {
+            const sender = await createTestUser();
+            const recipient = await createTestUser();
+            const message = new Message({
+                senderId: sender._id,
+                recipientId: recipient._id,
+                content: "Please read me",
+                type: "private"
+            });
+            await message.save();
+
+            message.isRead = true;
+            message.readAt = new Date();
+            const updatedMessage = await message.save();
+            expect(updatedMessage.isRead).toBe(true);
+            expect(updatedMessage.readAt).toBeDefined();
+        });
+
+        it("should soft delete a message", async () => {
+            const sender = await createTestUser();
+            const recipient = await createTestUser();
+            const message = new Message({
+                senderId: sender._id,
+                recipientId: recipient._id,
+                content: "This message will be deleted",
+                type: "private"
+            });
+            await message.save();
+
+            message.deletedAt = new Date();
+            const deletedMessage = await message.save();
+
+            expect(deletedMessage.deletedAt).toBeDefined();
+        });
+
+        it("should track message edits", async () => {
+            const sender = await createTestUser();
+            const recipient = await createTestUser();
+            const message = new Message({
+                senderId: sender._id,
+                recipientId: recipient._id,
+                content: "Original content",
+                type: "private"
+            });
+            await message.save();
+
+            message.content = "Edited content";
+            message.editedAt = new Date();
+            const editedMessage = await message.save();
+            expect(editedMessage.content).toBe("Edited content");
+            expect(editedMessage.editedAt).toBeDefined();
+        });
+    });
 });

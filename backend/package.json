@@ -7,7 +7,7 @@
     "dev": "nodemon --watch src --ext ts,json --exec \"node --loader ts-node/esm ./src/index.ts\"",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest --verbose --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
