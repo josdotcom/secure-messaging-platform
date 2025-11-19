@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import type { SignOptions } from 'jsonwebtoken';
 import { User } from '../models/User.js';
+import bcrypt from 'bcrypt';
 
 interface TokenPayload {
     userId: string;
@@ -45,14 +46,16 @@ class AuthService {
     }
 
     async login(email: string, password: string) {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase() });
+        
         if (!user) {
             throw new Error('Invalid email or password');
         }
 
-        user.isOnline = true;
-        user.lastActiveAt = new Date();
-        await user.save();
+        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isPasswordValid) {
+            throw new Error('Invalid credentials');
+        }
 
         const accessToken = this.generateAccessToken(
             user._id.toString(),
