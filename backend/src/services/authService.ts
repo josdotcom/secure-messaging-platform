@@ -57,13 +57,15 @@ class AuthService {
             throw new Error('Invalid credentials');
         }
 
+        await User.findByIdAndUpdate(user._id, { isOnline: true });
+        user.isOnline = true;
+
         const accessToken = this.generateAccessToken(
             user._id.toString(),
             user.email,
             user.role
         );
         const refreshToken = this.generateRefreshToken(user._id.toString());
-
         return {
             user: {
                 id: user._id,
