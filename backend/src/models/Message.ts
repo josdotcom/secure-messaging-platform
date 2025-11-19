@@ -1,5 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+const AttachmentSchema = new Schema({
+    url: { type: String, required: true },
+    filename: { type: String, required: true },
+    type: { type: String, required: true },
+    Size: { type: Number, required: true }
+}, { _id: false });
+
 export interface IMessage extends Document {
     _id: mongoose.Types.ObjectId;
     senderId: mongoose.Types.ObjectId;
@@ -7,12 +14,12 @@ export interface IMessage extends Document {
     groupId?: mongoose.Types.ObjectId;
     content: string;
     type: 'private' | 'group' | 'team';
-    attachments?: {
+    attachments?: Array<{
         url: string;
         filename: string;
         type: string;
         Size: number;
-    }[];
+    }>;
     isRead: boolean;
     readAt?: Date;
     isSpam: boolean;
@@ -52,13 +59,7 @@ const MessageSchema = new Schema<IMessage>({
         enum: ['private', 'group', 'team'],
         required: true
     },
-    attachments: [{
-        _id: false,
-        url: String,
-        filename: String,
-        type: String,
-        Size: Number
-    }],
+    attachments: [AttachmentSchema],
     isRead: {
         type: Boolean,
         default: false

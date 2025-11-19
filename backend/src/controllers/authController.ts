@@ -23,6 +23,12 @@ class AuthController {
     async login(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
+            if (!email || !password) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email and password are required"
+                });
+            }
             const result = await authService.login(email, password);
 
             res.status(200).json({
@@ -30,7 +36,7 @@ class AuthController {
                 data: result
             });
         } catch (err) {
-            res.status(400).json({
+            res.status(401).json({
                 success: false,
                 message: (err as Error).message
             });
@@ -50,7 +56,7 @@ class AuthController {
             });
         }
         catch (err) {
-            res.status(400).json({
+            res.status(401).json({
                 success: false,
                 message: (err as Error).message
             });
@@ -60,7 +66,10 @@ class AuthController {
     async logout(req: AuthRequest, res: Response) {
         try {
             if (!req.user) {
-                return res.status(401).json({ success: false, message: "Unauthorized" });
+                return res.status(401).json({ 
+                    success: false, 
+                    message: "Unauthorized" 
+                });
             }
 
             await authService.logout(req.user.userId);
@@ -71,7 +80,7 @@ class AuthController {
             });
         }
         catch (err) {
-            res.status(400).json({
+            res.status(401).json({
                 success: false,
                 message: (err as Error).message
             });
