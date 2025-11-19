@@ -17,7 +17,10 @@ export const authenticate = async (
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
         }
 
         const token = authHeader.substring(7);
@@ -26,14 +29,20 @@ export const authenticate = async (
         req.user = decoded;
         next();
     } catch (err) {
-        return res.status(401).json({ message: "Invalid or expired token" });
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token",
+        });
     }
 };
 
 export const authorize = (...roles: string[]) => {
     return (req: AuthRequest, res: Response, next: NextFunction) => {
         if (!req.user) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
         }
         if (!roles.includes(req.user.role)) {
             return res.status(403).json({ message: "Forbidden" });

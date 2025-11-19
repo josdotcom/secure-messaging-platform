@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { IUser, User } from '../../src/models/User';
+import jwt from 'jsonwebtoken';
 
 export const generateUserData = () => ({
     email: faker.internet.email(),
@@ -28,4 +29,12 @@ export const createTestUsers = async (count: number) => {
     users.push(user);
   }
   return users;
+};
+
+export const generateTestToken = (userId: string, email: string, role: string = 'user') => {
+  return jwt.sign(
+    { userId, email, role },
+    process.env.JWT_SECRET || 'test-secret',
+    { expiresIn: '1h' }
+  );
 };
