@@ -20,3 +20,12 @@ export const createTestUser = async (data?: Partial<IUser>) => {
     await user.save();
     return user;
 };
+
+export const createTestUsers = async (count: number) => {
+  const users = [];
+  for (let i = 0; i < count; i++) {
+    const user = await createTestUser();
+    users.push(user);
+  }
+  return users;
+};
