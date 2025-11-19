@@ -1,5 +1,5 @@
-import { Message } from "../../src/models/Message";
-import { createTestUser } from "../utils/testHelpers";
+import { Message } from "../../../src/models/Message";
+import { createTestUser } from "../../utils/testHelpers";
 
 describe("Message Model", () => {
     describe("Message Creation", () => {

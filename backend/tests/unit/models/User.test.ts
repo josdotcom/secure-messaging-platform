@@ -1,5 +1,5 @@
-import { User } from "../../src/models/User";
-import { generateUserData } from "../utils/testHelpers";
+import { User } from "../../../src/models/User";
+import { generateUserData } from "../../utils/testHelpers";
 
 describe("User Model", () => {
     describe("User Creation", () => {
