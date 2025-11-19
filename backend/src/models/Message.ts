@@ -27,6 +27,7 @@ export interface IMessage extends Document {
     editedAt?: Date;
     deletedAt?: Date;
     createdAt: Date;
+    tempId?: string;
 }
 
 const MessageSchema = new Schema<IMessage>({
@@ -74,13 +75,18 @@ const MessageSchema = new Schema<IMessage>({
         default: false
     },
     editedAt: Date,
-    deletedAt: Date
+    deletedAt: Date,
+    tempId: {                    
+        type: String,
+        required: false,
+        select: false
+    }
 }, {    timestamps: true
 });
 
 MessageSchema.index({ senderId: 1, createdAt: -1 });
 MessageSchema.index({ recipientId: 1, createdAt: -1 });
-MessageSchema.index({ GroupId: 1, createdAt: -1 });
+MessageSchema.index({ groupId: 1, createdAt: -1 });
 MessageSchema.index({ content: 'text'});
 
 export const Message = mongoose.model<IMessage>('Message', MessageSchema);
