@@ -24,7 +24,7 @@ export const authenticate = async (
         }
 
         const token = authHeader.substring(7);
-        const decoded = await authService.verifyAccessToken(token);
+        const decoded = authService.verifyAccessToken(token);
 
         req.user = decoded;
         next();

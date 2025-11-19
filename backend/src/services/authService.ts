@@ -10,8 +10,13 @@ interface TokenPayload {
 }
 
 class AuthService {
-    private jwtSecret = process.env.JWT_SECRET || 'secret';
-    private refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || 'refreshSecret';
+    private getJwtSecret() {
+        return process.env.JWT_SECRET || 'secret';
+    }
+    
+    private getRefreshTokenSecret() {
+        return process.env.REFRESH_TOKEN_SECRET || 'refreshSecret';
+    }
 
     async register(email: string, username: string, password: string) {
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -84,7 +89,7 @@ class AuthService {
     generateAccessToken(userId: string, email: string, role: string): string {
         return jwt.sign(
             { userId, email, role } as TokenPayload,
-            this.jwtSecret,
+            this.getJwtSecret(),
             { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as SignOptions
         );
     }
@@ -92,14 +97,14 @@ class AuthService {
     generateRefreshToken(userId: string): string {
         return jwt.sign(
             { userId },
-            this.refreshTokenSecret,
+            this.getRefreshTokenSecret(),
             { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d' } as SignOptions
         );
     }
 
     verifyAccessToken(token: string): TokenPayload {
         try {
-            return jwt.verify(token, this.jwtSecret) as TokenPayload;
+            return jwt.verify(token, this.getJwtSecret()) as TokenPayload;
         } catch (err) {
             throw new Error('Invalid or expired access token');
         }
@@ -107,7 +112,7 @@ class AuthService {
 
     async refreshAccessToken(refreshToken: string): Promise<string>{
         try {
-            const decoded = jwt.verify(refreshToken, this.refreshTokenSecret) as { userId: string };
+            const decoded = jwt.verify(refreshToken, this.getRefreshTokenSecret()) as { userId: string };
             const user = await User.findById(decoded.userId);
             if (!user) {
                 throw new Error('User not found');

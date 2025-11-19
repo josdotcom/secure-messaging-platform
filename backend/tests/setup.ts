@@ -4,6 +4,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
+  // Set test environment variables
+  process.env.JWT_SECRET = 'test-secret-key';
+  process.env.REFRESH_TOKEN_SECRET = 'test-refresh-secret-key';
+  
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri);

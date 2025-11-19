@@ -1,8 +1,7 @@
 import request from "supertest";
 import express from "express";
-import messageRoutes from "../../src/routes/messageRoutes";
+import messageRoutes from "../../src/routes/messageRoutes.js";
 import { createTestUser, createTestUsers, generateTestToken } from "../utils/testHelpers";
-import authService from "../../src/services/authService";
 
 const app = express();
 app.use(express.json());
@@ -109,6 +108,164 @@ describe("Message Controller Integration Tests", () => {
                 .expect(200);
             expect(response.body.success).toBe(true);
             expect(response.body.data).toHaveLength(2);
+        });
+
+        it ("should support pagination", async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const recipient = users[1];
+            const token = generateTestToken(sender._id.toString(), sender.email);
+
+            for (let i = 0; i < 75; i++) {
+                await request(app)
+                    .post("/messages")
+                    .set("Authorization", `Bearer ${token}`)
+                    .send({
+                        recipientId: recipient._id,
+                        content: `Message number ${i + 1}`,
+                        type: "private"
+                    });
+            }
+            
+            const page1 = await request(app)
+                .get(`/messages/conversation/${recipient._id}?page=1&limit=30`)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(200);
+            
+            expect(page1.body.data).toHaveLength(30);
+
+            const page2 = await request(app)
+                .get(`/messages/conversation/${recipient._id}?page=2&limit=30`)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(200);
+
+            expect(page2.body.data).toHaveLength(30);
+
+            const page3 = await request(app)
+                .get(`/messages/conversation/${recipient._id}?page=3&limit=30`)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(200);
+            expect(page3.body.data).toHaveLength(15);
+        });
+    });
+
+    describe('PUT /messages/:messageId/read', () => {
+        it('should mark a message as read', async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const recipient = users[1];
+            const senderToken = generateTestToken(sender._id.toString(), sender.email);
+            const recipientToken = generateTestToken(recipient._id.toString(), recipient.email);
+            const messageResponse = await request(app)
+                .post("/messages")
+                .set("Authorization", `Bearer ${senderToken}`)
+                .send({
+                    recipientId: recipient._id,
+                    content: "Please read this message.",
+                    type: "private"
+                });
+
+            const messageId = messageResponse.body.data._id;
+
+            const response = await request(app)
+                .put(`/messages/${messageId}/read`)
+                .set("Authorization", `Bearer ${recipientToken}`)
+                .expect(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.isRead).toBe(true);
+        });
+    });
+
+    describe('DELETE /messages/:messageId', () => {
+        it('should delete own message', async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const recipient = users[1];
+            const senderToken = generateTestToken(sender._id.toString(), sender.email);
+            const messageResponse = await request(app)
+                .post("/messages")
+                .set("Authorization", `Bearer ${senderToken}`)
+                .send({
+                    recipientId: recipient._id,
+                    content: "This message will be deleted.",
+                    type: "private"
+                });
+            const messageId = messageResponse.body.data._id;
+
+            const response = await request(app)
+                .delete(`/messages/${messageId}`)
+                .set("Authorization", `Bearer ${senderToken}`)
+                .expect(200);
+            expect(response.body.success).toBe(true);
+        });
+
+        it('should not allow deleting others\' messages', async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const recipient = users[1];
+            const senderToken = generateTestToken(sender._id.toString(), sender.email);
+            const recipientToken = generateTestToken(recipient._id.toString(), recipient.email);
+            const messageResponse = await request(app)
+                .post("/messages")
+                .set("Authorization", `Bearer ${senderToken}`)
+                .send({
+                    recipientId: recipient._id,
+                    content: "You cannot delete this message.",
+                    type: "private"
+                });
+            const messageId = messageResponse.body.data._id;
+
+            const response = await request(app)
+                .delete(`/messages/${messageId}`)
+                .set("Authorization", `Bearer ${recipientToken}`)
+                .expect(400);
+            expect(response.body.success).toBe(false);
+        });
+    });
+
+    describe('GET /messages/search', () => {
+        it('should search messages by query', async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const recipient = users[1];
+            const token = generateTestToken(sender._id.toString(), sender.email);
+
+            await request(app)
+                .post("/messages")
+                .set("Authorization", `Bearer ${token}`)
+                .send({
+                    recipientId: recipient._id,
+                    content: "This is a unique search term message.",
+                    type: "private"
+                });
+
+            await request(app)
+                .post("/messages")
+                .set("Authorization", `Bearer ${token}`)
+                .send({
+                    recipientId: recipient._id,
+                    content: "Another message without the term.",
+                    type: "private"
+                });
+
+            const response = await request(app)
+                .get(`/messages/search?q=unique search term`)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(200);
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.length).toBeGreaterThan(0);
+            expect(response.body.data[0].content).toContain("unique search term");
+        });
+
+        it('should return 400 without query parameter', async () => {
+            const users = await createTestUsers(2);
+            const sender = users[0];
+            const token = generateTestToken(sender._id.toString(), sender.email);
+            const response = await request(app)
+                .get(`/messages/search`)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(400);
+            expect(response.body.success).toBe(false);
         });
     });
 });

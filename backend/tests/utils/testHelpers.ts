@@ -34,7 +34,7 @@ export const createTestUsers = async (count: number) => {
 export const generateTestToken = (userId: string, email: string, role: string = 'user') => {
   return jwt.sign(
     { userId, email, role },
-    process.env.JWT_SECRET || 'test-secret',
+    process.env.JWT_SECRET || 'test-secret-key',
     { expiresIn: '1h' }
   );
 };
